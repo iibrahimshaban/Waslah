@@ -1,0 +1,22 @@
+﻿global using Mapster;
+global using MapsterMapper;
+
+global using Waslah;
+global using Microsoft.EntityFrameworkCore;
+global using Waslah.Entities;
+global using Waslah.Presistence;
+global using Microsoft.EntityFrameworkCore.Metadata.Builders;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Mvc;
+global using Waslah.Contracts.Stations;
+global using Waslah.Services;
+global using Waslah.Abstraction;
+global using System.Reflection;
+global using System.ComponentModel.DataAnnotations;
+global using Waslah.ValidationAttributes;
+global using Waslah.Contracts.GeneratedRoutes;
+global using Waslah.Mapping;
+global using Waslah.Contracts.ChainedRoutes;
+global using OneOf;
+global using Waslah.Extensions;
+global using Waslah.Errors;
