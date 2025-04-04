@@ -13,6 +13,8 @@
         public Station SecStation { get; set; } = default!;
         public ICollection<RouteConnector> connectors { get; set; } = [];
         public ICollection<ChainedRoute> chainedRoutes { get; set; } = [];
+        public ICollection<Report> Reports { get; set; } = [];   
+        public ICollection<ApplicationUser> Users { get; set; } = [];   
 
     }
 }

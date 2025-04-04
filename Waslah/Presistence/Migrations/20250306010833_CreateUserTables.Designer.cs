@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Waslah.Presistence;
 
@@ -11,9 +12,11 @@ using Waslah.Presistence;
 namespace Waslah.Presistence.migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250306010833_CreateUserTables")]
+    partial class CreateUserTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -304,81 +307,6 @@ namespace Waslah.Presistence.migrations
                     b.ToTable("MyRoutes", (string)null);
                 });
 
-            modelBuilder.Entity("Waslah.Entities.Order", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<double>("DistanceFromDestination")
-                        .HasColumnType("float");
-
-                    b.Property<double>("DistanceFromStart")
-                        .HasColumnType("float");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RouteId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RouteId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("Waslah.Entities.Report", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("RouteId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Sevirity")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("UserFeedBack")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RouteId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Reports");
-                });
-
             modelBuilder.Entity("Waslah.Entities.RouteConnector", b =>
                 {
                     b.Property<int>("MyRouteId")
@@ -460,43 +388,6 @@ namespace Waslah.Presistence.migrations
                     b.HasKey("Name");
 
                     b.ToTable("StationTypes");
-                });
-
-            modelBuilder.Entity("Waslah.Entities.UserPoints", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("DestinationLatitude")
-                        .HasColumnType("float");
-
-                    b.Property<double>("DestinationLongitude")
-                        .HasColumnType("float");
-
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
-
-                    b.Property<double>("OriginLatitude")
-                        .HasColumnType("float");
-
-                    b.Property<double>("OriginLongitude")
-                        .HasColumnType("float");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserPoints");
                 });
 
             modelBuilder.Entity("Waslah.Entities.ApplicationUser", b =>
@@ -609,44 +500,6 @@ namespace Waslah.Presistence.migrations
                     b.Navigation("SecStation");
                 });
 
-            modelBuilder.Entity("Waslah.Entities.Order", b =>
-                {
-                    b.HasOne("Waslah.Entities.ChainedRoute", "Route")
-                        .WithMany("Orders")
-                        .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Waslah.Entities.ApplicationUser", "User")
-                        .WithMany("Orders")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Route");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Waslah.Entities.Report", b =>
-                {
-                    b.HasOne("Waslah.Entities.MyRoute", "Route")
-                        .WithMany("Reports")
-                        .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Waslah.Entities.ApplicationUser", "User")
-                        .WithMany("Reports")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Route");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Waslah.Entities.RouteConnector", b =>
                 {
                     b.HasOne("Waslah.Entities.ChainedRoute", "ChainedRoute")
@@ -675,65 +528,13 @@ namespace Waslah.Presistence.migrations
                     b.Navigation("StationType");
                 });
 
-            modelBuilder.Entity("Waslah.Entities.UserPoints", b =>
-                {
-                    b.HasOne("Waslah.Entities.ApplicationUser", "User")
-                        .WithMany("Points")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Waslah.Entities.ApplicationUser", b =>
-                {
-                    b.OwnsMany("Waslah.Entities.RefreshToken", "RefreshTokens", b1 =>
-                        {
-                            b1.Property<string>("UserId")
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
-
-                            b1.Property<DateTime>("CreatedOn")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<DateTime>("ExpiresOn")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<DateTime?>("RevokedOn")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<string>("Token")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("UserId", "Id");
-
-                            b1.ToTable("RefreshTokens", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
-                        });
-
-                    b.Navigation("RefreshTokens");
-                });
-
             modelBuilder.Entity("Waslah.Entities.ChainedRoute", b =>
                 {
-                    b.Navigation("Orders");
-
                     b.Navigation("RoutesInfo");
                 });
 
             modelBuilder.Entity("Waslah.Entities.MyRoute", b =>
                 {
-                    b.Navigation("Reports");
-
                     b.Navigation("connectors");
                 });
 
@@ -751,15 +552,6 @@ namespace Waslah.Presistence.migrations
             modelBuilder.Entity("Waslah.Entities.StationType", b =>
                 {
                     b.Navigation("Stations");
-                });
-
-            modelBuilder.Entity("Waslah.Entities.ApplicationUser", b =>
-                {
-                    b.Navigation("Orders");
-
-                    b.Navigation("Points");
-
-                    b.Navigation("Reports");
                 });
 #pragma warning restore 612, 618
         }

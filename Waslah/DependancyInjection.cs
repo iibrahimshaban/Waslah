@@ -1,4 +1,11 @@
 ﻿
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Waslah.Authentication;
+
 namespace Waslah
 {
     public static class DependancyInjection
@@ -7,7 +14,9 @@ namespace Waslah
             ,IConfiguration configuration)
         {
             services.AddControllers();
-            services.AddOpenApi()
+            services
+                .AddIdentityConfiguration(configuration)
+                .AddOpenApi()
                 .AddDbContextConfig(configuration)
                 .AddServicesRegisteration()
                 .AddMappingConfig();
@@ -28,10 +37,10 @@ namespace Waslah
         private static IServiceCollection AddServicesRegisteration(this IServiceCollection services)
         {
             services.AddScoped<IStationServices, StationServices>();
-            services.AddScoped<IDistanceCalculator,DistanceCalculator>();
             services.AddScoped<IRouteGeneratorServices,RouteGeneratorServices>();
             services.AddScoped<IChainedRouteServices,ChainedRouteServices>();
-
+            services.AddScoped<IOrderService, OrderService>();
+            
             return services;
         }
         private static IServiceCollection AddMappingConfig(this IServiceCollection services)
@@ -41,7 +50,57 @@ namespace Waslah
 
             services.AddSingleton<IMapper>(new Mapper(MappingConfig));
 
+            services.AddFluentValidationAutoValidation()
+             .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
             return services;
+        }
+        private static IServiceCollection AddIdentityConfiguration(this IServiceCollection services
+    ,       IConfiguration configuration)
+        {
+            services.AddScoped<IAuthService, AuthService>();
+
+            services.AddOptions<JwtOptions>()
+                .BindConfiguration(JwtOptions.SectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            var settings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddSingleton<IJwtProvider, JwtProvider>();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+             .AddJwtBearer(o =>
+             {
+                 o.SaveToken = true;
+                 o.TokenValidationParameters = new TokenValidationParameters
+                 {
+                     ValidateIssuerSigningKey = true,
+                     ValidateIssuer = true,
+                     ValidateAudience = true,
+                     ValidateLifetime = true,
+                     IssuerSigningKey = new
+                     SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings!.Key)),
+                     ValidIssuer = settings.Issuer,
+                     ValidAudience = settings.Audience
+                 };
+             });
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.User.RequireUniqueEmail = true;
+            });
+
+            return services;
+
         }
     }
     

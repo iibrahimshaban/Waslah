@@ -1,12 +1,11 @@
-﻿
-using Waslah.Mapping;
-
-namespace Waslah.Services
+﻿namespace Waslah.Services
 {
-    public class ChainedRouteServices(ApplicationDbContext context,IStationServices station) : IChainedRouteServices
+    public class ChainedRouteServices(ApplicationDbContext context,IStationServices station 
+        , IRouteGeneratorServices routeGenerator) : IChainedRouteServices
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IStationServices _station = station;
+        private readonly IRouteGeneratorServices _routeGenerator = routeGenerator;
 
         public async Task<IEnumerable<RouteResponse>> GetAllAsync(CancellationToken cancellationToken)
         {
@@ -17,7 +16,8 @@ namespace Waslah.Services
             return result.MapToRouteResponse();
             
         }
-        public async Task<IEnumerable<RouteResponse>> GetByLocationIdAsync(IEnumerable<GeneratedRouteResponse> LocationIds, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<ChainedRoute>>> GetByLocationIdAsync(IEnumerable<GeneratedRouteResponse> LocationIds
+            , CancellationToken cancellationToken)
         {
             var routes = new List<ChainedRoute>();
 
@@ -33,17 +33,44 @@ namespace Waslah.Services
                 routes.AddRange(ChainedRoutes);
             }
 
-            var response = routes.MapToRouteResponse().ToList();
+            if (routes.Any())
+                return Result.Success<IEnumerable<ChainedRoute>>(routes);
 
-            return response;
+            return Result.Failure<IEnumerable<ChainedRoute>>(RouteErrors.NotFound);
         }
-        public async Task<OneOf<IEnumerable<RouteResponse>, RouteGeneratorRequest>> FindByLocationPointsAsync(RouteRequest request
-            , CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<RouteResponse>>> FindByLocationPointsAsync(RouteRequest request
+           ,string UserId , CancellationToken cancellationToken)
         {
+            
             var Points =  request.EvaluatePoints();
 
-            var NearestToStart = await _station.GetNearestStationsAsync(Points.StartLatitude,Points.StartLongitude,5);
-            var NearestToEnd = await _station.GetNearestStationsAsync(Points.EndtLatitude,Points.EndLongitude,5);
+            var UserExistis = await _context.UserPoints
+                .Where(x => x.UserId == UserId)
+                .ToListAsync(cancellationToken);
+
+            if (UserExistis.Count > 0)
+            {
+                foreach (var point in UserExistis)
+                {
+                    point.IsLocked = false;
+                }
+            }
+
+
+            var UserPoint = new UserPoints
+            {
+                OriginLatitude = Points.StartLatitude,
+                OriginLongitude = Points.StartLongitude,
+                DestinationLatitude = Points.EndtLatitude,
+                DestinationLongitude = Points.EndLongitude,
+                UserId = UserId
+            };
+
+            await _context.UserPoints.AddAsync(UserPoint);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var NearestToStart = await _station.GetNearestStationsAsync(Points.StartLatitude,Points.StartLongitude,5,cancellationToken);
+            var NearestToEnd = await _station.GetNearestStationsAsync(Points.EndtLatitude,Points.EndLongitude,5,cancellationToken);
 
             var StartIds = NearestToStart.Select(x => x.Station.LocationId).ToList();
             var EndIds = NearestToEnd.Select(x => x.Station.LocationId).ToList();
@@ -54,6 +81,7 @@ namespace Waslah.Services
             NearestToStart.ToList().ForEach(x => StartStations.Add(x.Station.LocationId,x.Distance));
             NearestToEnd.ToList().ForEach(x => EndStations.Add(x.Station.LocationId,x.Distance));
 
+            // if chained route is already stored in DB
             var routes = await _context.ChainedRoutes
                 .Where(cr => StartIds.Contains(cr.FirstLocId) && EndIds.Contains(cr.LastLocId))
                 .Include(x => x.FirstLoc).Include(x => x.LastLoc)
@@ -62,14 +90,25 @@ namespace Waslah.Services
                 .ToListAsync(cancellationToken);
 
 
-            if (!routes.Any())
-                return new RouteGeneratorRequest(NearestToStart, NearestToEnd);
+            if (routes.Any())
+            {
+                var response = routes.MapToRouteResponseTemporary(StartStations, EndStations).ToList();
+                return Result.Success<IEnumerable<RouteResponse>>(response);
+            }
 
-            var response = routes.MapToRouteResponseTemporary(StartStations,EndStations).ToList();
+            // using RCBA to chain a route
+            var GeneratedIds = await _routeGenerator.GetRouteAsync(new (NearestToStart, NearestToEnd), cancellationToken);
+            
+            if (GeneratedIds.IsFailur)
+                return Result.Failure<IEnumerable<RouteResponse>>(RouteErrors.NotFound);
 
-            return response;
+            var result = await GetByLocationIdAsync(GeneratedIds.Value, cancellationToken);
 
+            if (result.IsFailur)
+                return Result.Failure<IEnumerable<RouteResponse>>(RouteErrors.NotFound);
 
+            var GeneratedRoutes = result.Value.MapToRouteResponseTemporary(StartStations, EndStations);
+            return Result.Success(GeneratedRoutes);
         }
     }
 }

@@ -1,10 +1,11 @@
 ﻿
-
 using System.Reflection;
 
 namespace Waslah.Presistence
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
+        : IdentityDbContext(options)
+       
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +28,9 @@ namespace Waslah.Presistence
         public DbSet<ChainedRoute> ChainedRoutes { get; set; }
         public DbSet<RouteConnector> RouteConnectors { get; set; }
         public DbSet<StationType> StationTypes { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<UserPoints> UserPoints { get; set; }
 
     }
 }

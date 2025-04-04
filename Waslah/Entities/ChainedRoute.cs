@@ -14,6 +14,8 @@
         public ICollection<MyRoute> Routes { get; set; } = [];
         public Station FirstLoc { get; set; } = default!;
         public Station LastLoc { get; set; } = default!;
+        public ICollection<ApplicationUser> Users { get; set; } = [];
+        public ICollection<Order> Orders { get; set; } = [];
 
     }
 }

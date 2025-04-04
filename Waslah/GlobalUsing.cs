@@ -1,5 +1,10 @@
 ﻿global using Mapster;
 global using MapsterMapper;
+global using OneOf;
+global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Identity;
+global using Waslah.Authentication;
+global using FluentValidation;
 
 global using Waslah;
 global using Microsoft.EntityFrameworkCore;
@@ -17,6 +22,10 @@ global using Waslah.ValidationAttributes;
 global using Waslah.Contracts.GeneratedRoutes;
 global using Waslah.Mapping;
 global using Waslah.Contracts.ChainedRoutes;
-global using OneOf;
 global using Waslah.Extensions;
 global using Waslah.Errors;
+global using Waslah.Contracts.Auth;
+global using System.Security.Cryptography;
+global using Waslah.Contracts.Orders;
+global using System.Security.Claims;
+global using Microsoft.AspNetCore.Authorization;

@@ -61,7 +61,6 @@ namespace Waslah.Services
             var result = await StationToCity(Request.NearestToStart, Request.NearestToEnd, cancellationToken);
 
             
-
             if (result.IsSuccess)
             {
                foreach (var item in result.Value)

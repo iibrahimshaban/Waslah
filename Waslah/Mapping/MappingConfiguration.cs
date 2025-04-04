@@ -21,6 +21,13 @@
                 .Map(dest => dest.StartCoordinates, src => src.PriStation.Latitude + " ," + src.PriStation.Longitude)
                 .Map(dest => dest.EndName, src => src.SecStation.Name)
                 .Map(dest => dest.EndCoordinates, src => src.SecStation.Latitude + " ," + src.SecStation.Longitude);
+
+            config.NewConfig<Order, OrderResponse>()
+                .Map(dest => dest.ChainedRouteId , src => src.Route.Id)
+                .Map(dest => dest.StartStation, src => src.Route.FirstLoc.Name)
+                .Map(dest => dest.DestinationStation, src => src.Route.LastLoc.Name)
+                .Map(dest => dest.UserName, src => src.User.FirstName + ' ' + src.User.LastName)
+                .Map(dest => dest.UsedAt, src => DateOnly.FromDateTime(src.UsedAt));
                 
 
         }

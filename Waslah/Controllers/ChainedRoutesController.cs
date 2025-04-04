@@ -1,8 +1,8 @@
-﻿
-namespace Waslah.Controllers
+﻿namespace Waslah.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ChainedRoutesController(IChainedRouteServices chainedRoute ,IRouteGeneratorServices routeServices) : ControllerBase
     {
         private readonly IChainedRouteServices _chainedRoute = chainedRoute;
@@ -22,21 +22,12 @@ namespace Waslah.Controllers
         public async Task<IActionResult> GetByLocationAsync([FromBody] RouteRequest Request,
             CancellationToken cancellationToken)
         {
-            var result = await _chainedRoute.FindByLocationPointsAsync(Request,cancellationToken);
+            var UserId = User.GetUserId();
+            var result = await _chainedRoute.FindByLocationPointsAsync(Request,UserId!,cancellationToken);
 
-            if (result.IsT0)
-                return Ok(result.AsT0);
-
-            var LocationsResult = await _routeServices.GetRouteAsync(result.AsT1,cancellationToken);
-
-            if (LocationsResult.IsSuccess)
-            {
-                var GeneratedRoute = await _chainedRoute.GetByLocationIdAsync(LocationsResult.Value, cancellationToken);
-                Ok(GeneratedRoute);
-            }
-
-
-            return LocationsResult.ToProblem();
+            return result.IsSuccess
+                ? Ok(result.Value)
+                : result.ToProblem();
             
         }
     }
