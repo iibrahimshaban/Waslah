@@ -8,7 +8,7 @@
         public double DestinationLatitude { get; set; }
         public double DestinationLongitude { get; set; }
         public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
-        public bool IsLocked { get; set; } = true;
+        public bool IsLocked { get; set; } = false;
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser User { get; set; } = default!;
     }

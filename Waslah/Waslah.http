@@ -1,6 +1,0 @@
-@Waslah_HostAddress = http://localhost:5153
-
-GET {{Waslah_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

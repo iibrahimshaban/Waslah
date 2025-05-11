@@ -49,60 +49,49 @@ namespace Waslah.Mapping
 
             return ChainedRoute;
         }
-        public static IEnumerable<RouteResponse> MapToRouteResponse(this IEnumerable<ChainedRoute> chainedRoutes)
+        public static IEnumerable<RouteDetailsResponse> MapToRouteResponse(this IEnumerable<ChainedRoute> chainedRoutes,
+                Dictionary<int, double> start , Dictionary<int, double> end)
         {
-            var response = new List<RouteResponse>();
+            var response = new List<RouteDetailsResponse>();
 
             foreach (var cr in chainedRoutes)
             {
-                var YourRoute = new RouteResponse(
-                    cr.Id
-                    , new ChainedStationResponse(
-                        cr.FirstLocId, cr.FirstLoc.Name, cr.FirstLoc.City, cr.FirstLoc.Latitude + " ," + cr.FirstLoc.Longitude
-                        , null
-                    ), new ChainedStationResponse(
-                        cr.LastLocId, cr.LastLoc.Name, cr.LastLoc.City, cr.LastLoc.Latitude + " ," + cr.LastLoc.Longitude
-                        ,null
-                    )
-                    , cr.Routes.Adapt<IEnumerable<ListedRouteResponse>>()
-                    , cr.Routes.Count()
-                    , cr.Routes.Sum(x => x.Price),
-                    cr.Routes.Sum(x => x.Distance),
-                    cr.Routes.Sum(x => x.Time)
-                    );
+                // Get distances safely
+                double startDistance = start.TryGetValue(cr.FirstLocId, out var sDist) ? sDist : 0;
+                double endDistance = end.TryGetValue(cr.LastLocId, out var eDist) ? eDist : 0;
 
-                response.Add(YourRoute);
+                // Format coordinates as "lat, lng"
+                string firstCoords = $"{cr.FirstLoc!.Latitude}, {cr.FirstLoc.Longitude}";
+                string lastCoords = $"{cr.LastLoc!.Latitude}, {cr.LastLoc.Longitude}";
+
+                var routeResponse = new RouteDetailsResponse(
+                    cr.Id,
+                    new ChainedStationResponse(
+                        cr.FirstLocId,
+                        cr.FirstLoc?.Name ?? string.Empty,
+                        cr.FirstLoc?.City ?? string.Empty,
+                        firstCoords,
+                        startDistance
+                    ),
+                    new ChainedStationResponse(
+                        cr.LastLocId,
+                        cr.LastLoc?.Name ?? string.Empty,
+                        cr.LastLoc?.City ?? string.Empty,
+                        lastCoords,
+                        endDistance
+                    ),
+                    cr.Routes?.Adapt<IEnumerable<ListedRouteResponse>>() ?? Enumerable.Empty<ListedRouteResponse>(),
+                    cr.Routes?.Count() ?? 0,
+                    cr.Routes?.Sum(x => x.Price) ?? 0,
+                    cr.Routes?.Sum(x => x.Distance) ?? 0,
+                    cr.Routes?.Sum(x => x.Time) ?? 0
+                );
+
+                response.Add(routeResponse);
             }
 
             return response;
         }
-        public static IEnumerable<RouteResponse> MapToRouteResponseTemporary(this IEnumerable<ChainedRoute> chainedRoutes,
-            Dictionary<int, double> start, Dictionary<int, double> end)
-        {
-            var response = new List<RouteResponse>();
 
-            foreach (var cr in chainedRoutes)
-            {
-                var YourRoute = new RouteResponse(
-                    cr.Id
-                    , new ChainedStationResponse(
-                        cr.FirstLocId, cr.FirstLoc.Name, cr.FirstLoc.City, cr.FirstLoc.Latitude + " ," + cr.FirstLoc.Longitude
-                        , start[cr.FirstLocId]
-                    ), new ChainedStationResponse(
-                        cr.LastLocId, cr.LastLoc.Name, cr.LastLoc.City, cr.LastLoc.Latitude + " ," + cr.LastLoc.Longitude
-                        , end[cr.LastLocId]
-                    )
-                    , cr.Routes.Adapt<IEnumerable<ListedRouteResponse>>()
-                    , cr.Routes.Count()
-                    , cr.Routes.Sum(x => x.Price),
-                    cr.Routes.Sum(x => x.Distance),
-                    cr.Routes.Sum(x => x.Time)
-                    );
-
-                response.Add(YourRoute);
-            }
-
-            return response;
-        }
     }
 }

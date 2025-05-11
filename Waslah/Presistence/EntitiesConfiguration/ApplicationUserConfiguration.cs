@@ -1,4 +1,6 @@
-﻿namespace Waslah.Presistence.EntitiesConfiguration
+﻿using Waslah.Abstraction.Consts;
+
+namespace Waslah.Presistence.EntitiesConfiguration
 {
     public class ApplicationUserConfiguration : IEntityTypeConfiguration<ApplicationUser>
     {
@@ -27,22 +29,26 @@
         j => j
             .HasKey(k => k.Id)
             );
-
             builder
-            .HasMany(U => U.Routes)
-            .WithMany(r => r.Users)
-            .UsingEntity<Report>(
-        y => y
-            .HasOne(r => r.Route)
-            .WithMany(r => r.Reports)
-            .HasForeignKey(r => r.RouteId),
-        x => x
-            .HasOne(u => u.User)
-            .WithMany(u => u.Reports)
-            .HasForeignKey(u => u.UserId),
-        j => j
-            .HasKey(k => k.Id)
-            );
+           .HasMany(u => u.Reports)
+           .WithOne(r => r.User)
+           .HasForeignKey(r => r.UserId);
+
+            builder.HasData(new ApplicationUser
+            {
+                Id = DefaultUsers.UserId,
+                Email = DefaultUsers.Email,
+                NormalizedEmail = DefaultUsers.Email.ToUpper(),
+                PasswordHash = DefaultUsers.HashedPassword,
+                EmailConfirmed = true,
+                LockoutEnabled = true,
+                SecurityStamp = DefaultUsers.SecurityStamp,
+                ConcurrencyStamp = DefaultUsers.ConcurrencyStamp,
+                FirstName = DefaultUsers.FirstName,
+                LastName = DefaultUsers.LastName,
+                UserName = DefaultUsers.UserName,
+                NormalizedUserName = DefaultUsers.UserName.ToUpper()
+            });
         }
     }
 }

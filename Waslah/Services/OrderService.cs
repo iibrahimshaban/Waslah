@@ -18,28 +18,32 @@ namespace Waslah.Services
         }
         public async Task<Result> CreateAsync(OrderRequest request,string userId, CancellationToken cancellationToken)
         {
-            var RouteExistis = await _context.ChainedRoutes
-                .Include(x => x.FirstLoc)
-                .Include(x => x.LastLoc)
-                .FirstOrDefaultAsync(x => x.Id == request.ChainedRouteId);
+            var Route = await _context.ChainedRoutes
+                .Where(x => x.Id == request.ChainedRouteId)
+                .Include(x => x.Routes).ThenInclude(x => x.PriStation)
+                .Include(x => x.Routes).ThenInclude(x => x.SecStation)
+                .AsNoTracking()
+                .SingleOrDefaultAsync(cancellationToken);
 
-            if (RouteExistis == null)
-                return Result.Failure(RouteErrors.NotFound);
+            if (Route is null)
+                return Result.Failure(OrderErrors.RouteNotFound);
 
-            var UserExistis = await _context.UserPoints.AnyAsync(x => x.UserId == userId,cancellationToken);
-
-            if (!UserExistis)
-                return Result.Failure(UserErrors.NotFound);
 
             var UserPoint = await _context.UserPoints
-                .Where(x => x.UserId == userId && x.IsLocked)
+                .Where(x => x.UserId == userId && !x.IsLocked)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            var DistanceFromStart = _stationServices.CalculateDistance(RouteExistis.FirstLoc.Latitude
-                , RouteExistis.FirstLoc.Longitude,UserPoint!.OriginLatitude,UserPoint.OriginLongitude);
+            if (UserPoint == null)
+                return Result.Failure(OrderErrors.TripsNotFound);
 
-            var DistanceFromEnd = _stationServices.CalculateDistance(RouteExistis.LastLoc.Latitude
-                , RouteExistis.LastLoc.Longitude, UserPoint!.DestinationLatitude, UserPoint.DestinationLongitude);
+            var StartStation = Route.Routes.FirstOrDefault()!.PriStation;
+            var LastStation = Route.Routes.LastOrDefault()!.SecStation;
+
+            var DistanceFromStart = _stationServices.CalculateDistance(StartStation.Latitude
+                , StartStation.Longitude, UserPoint!.OriginLatitude,UserPoint.OriginLongitude);
+
+            var DistanceFromEnd = _stationServices.CalculateDistance(LastStation.Latitude
+                , LastStation.Longitude, UserPoint!.DestinationLatitude, UserPoint.DestinationLongitude);
 
             var Order = new Order
             {

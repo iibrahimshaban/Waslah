@@ -22,33 +22,6 @@ namespace Waslah.Presistence.migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.ToTable("AspNetRoles", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -72,80 +45,120 @@ namespace Waslah.Presistence.migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
-                });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("nvarchar(21)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasDiscriminator().HasValue("IdentityUser");
-
-                    b.UseTphMappingStrategy();
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ClaimType = "Permissions",
+                            ClaimValue = "User:Read",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ClaimType = "Permissions",
+                            ClaimValue = "User:Create",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ClaimType = "Permissions",
+                            ClaimValue = "User:Update",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Roles:Read",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Roles:Create",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Roles:Update",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Results:Read",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Reports:Read",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Route:Read",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Route:Create",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Route:Update",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Station:Read",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Station:Create",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Station:Update",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Agency:Create",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            ClaimType = "Permissions",
+                            ClaimValue = "Agency:Upadte",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -208,6 +221,13 @@ namespace Waslah.Presistence.migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "01968e52-bf6e-781f-a030-df270bd865be",
+                            RoleId = "01968e52-bf6e-781f-a030-df2af8539b2d"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -227,6 +247,247 @@ namespace Waslah.Presistence.migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Waslah.Entities.AgencyLink", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AgencyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgencyId");
+
+                    b.HasIndex("Name", "Url")
+                        .IsUnique();
+
+                    b.ToTable("Links", (string)null);
+                });
+
+            modelBuilder.Entity("Waslah.Entities.AgencyTrip", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AgencyName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DestinationCity")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsDiasabled")
+                        .HasColumnType("bit");
+
+                    b.Property<double>("NumberOfDays")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhotoPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PickUpCity")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("PickUpDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgencyName", "PickUpCity", "DestinationCity", "PickUpDate")
+                        .IsUnique();
+
+                    b.ToTable("AgenciesTrip");
+                });
+
+            modelBuilder.Entity("Waslah.Entities.ApplicationRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "01968e52-bf6e-781f-a030-df2af8539b2d",
+                            ConcurrencyStamp = "01968e52-bf6e-781f-a030-df2b49eabe1c",
+                            IsDefault = false,
+                            IsDisabled = false,
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "01968e52-bf6e-781f-a030-df2c4fdc74fd",
+                            ConcurrencyStamp = "01968e52-bf6e-781f-a030-df2d340142a4",
+                            IsDefault = true,
+                            IsDisabled = false,
+                            Name = "Member",
+                            NormalizedName = "MEMBER"
+                        });
+                });
+
+            modelBuilder.Entity("Waslah.Entities.ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ProfilePhotoPath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "01968e52-bf6e-781f-a030-df270bd865be",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "01968e52-bf6e-781f-a030-df28ddfd3090",
+                            Email = "IibrahimKhaled@gmail.com",
+                            EmailConfirmed = true,
+                            FirstName = "Ibrahim",
+                            IsDisabled = false,
+                            LastName = "Shaban",
+                            LockoutEnabled = true,
+                            NormalizedEmail = "IIBRAHIMKHALED@GMAIL.COM",
+                            NormalizedUserName = "IBRAHIM",
+                            PasswordHash = "AQAAAAIAAYagAAAAELHGazbET00Upjxl0rBA4nwtpT2aX6c1/Akz8H23+wLysfHdFIZlBtNVfFtCBexAKQ==",
+                            PhoneNumberConfirmed = false,
+                            ProfilePhotoPath = "",
+                            SecurityStamp = "01968e52bf6e781fa030df29ab177dea",
+                            TwoFactorEnabled = false,
+                            UserName = "Ibrahim"
+                        });
                 });
 
             modelBuilder.Entity("Waslah.Entities.ChainedRoute", b =>
@@ -269,6 +530,37 @@ namespace Waslah.Presistence.migrations
                     b.ToTable("ChainedRoutes");
                 });
 
+            modelBuilder.Entity("Waslah.Entities.ModelEncodingMap", b =>
+                {
+                    b.Property<int>("LocId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CityName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CityNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GovName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("GovNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StationName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StationNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("LocId");
+
+                    b.ToTable("EncodingMaps");
+                });
+
             modelBuilder.Entity("Waslah.Entities.MyRoute", b =>
                 {
                     b.Property<int>("Id")
@@ -278,10 +570,21 @@ namespace Waslah.Presistence.migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Classification")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<double?>("Distance")
                         .HasColumnType("float");
+
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("bit");
 
                     b.Property<double?>("Price")
                         .HasColumnType("float");
@@ -295,11 +598,22 @@ namespace Waslah.Presistence.migrations
                     b.Property<double?>("Time")
                         .HasColumnType("float");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("PrimaryLocId");
+                    b.HasIndex("CreatedById");
 
                     b.HasIndex("SecondaryLocId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.HasIndex("PrimaryLocId", "SecondaryLocId")
+                        .IsUnique();
 
                     b.ToTable("MyRoutes", (string)null);
                 });
@@ -338,6 +652,35 @@ namespace Waslah.Presistence.migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("Waslah.Entities.OtpEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Code")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiresIn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OtpEntries");
                 });
 
             modelBuilder.Entity("Waslah.Entities.Report", b =>
@@ -406,18 +749,29 @@ namespace Waslah.Presistence.migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("CityNo")
+                    b.Property<int>("CityNo")
                         .HasColumnType("int");
 
-                    b.Property<int?>("GovNo")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("GovNo")
                         .HasColumnType("int");
 
                     b.Property<string>("Government")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool?>("IsActivated")
+                    b.Property<bool>("IsActivated")
                         .HasColumnType("bit");
 
                     b.Property<double>("Latitude")
@@ -429,21 +783,30 @@ namespace Waslah.Presistence.migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("float");
 
-                    b.Property<string>("ModelId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("StationNo")
+                    b.Property<int>("StationNo")
                         .HasColumnType("int");
 
                     b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedById");
+
                     b.HasIndex("Type");
+
+                    b.HasIndex("UpdatedById");
 
                     b.ToTable("Stations");
                 });
@@ -499,26 +862,9 @@ namespace Waslah.Presistence.migrations
                     b.ToTable("UserPoints");
                 });
 
-            modelBuilder.Entity("Waslah.Entities.ApplicationUser", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
-                    b.HasDiscriminator().HasValue("ApplicationUser");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Waslah.Entities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -527,7 +873,7 @@ namespace Waslah.Presistence.migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Waslah.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -536,7 +882,7 @@ namespace Waslah.Presistence.migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Waslah.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -545,13 +891,13 @@ namespace Waslah.Presistence.migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Waslah.Entities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Waslah.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -560,11 +906,59 @@ namespace Waslah.Presistence.migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Waslah.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Waslah.Entities.AgencyLink", b =>
+                {
+                    b.HasOne("Waslah.Entities.AgencyTrip", "AgencyTrip")
+                        .WithMany("Links")
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AgencyTrip");
+                });
+
+            modelBuilder.Entity("Waslah.Entities.ApplicationUser", b =>
+                {
+                    b.OwnsMany("Waslah.Entities.RefreshToken", "RefreshTokens", b1 =>
+                        {
+                            b1.Property<string>("UserId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime>("ExpiresOn")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime?>("RevokedOn")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("Token")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("UserId", "Id");
+
+                            b1.ToTable("RefreshTokens", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("Waslah.Entities.ChainedRoute", b =>
@@ -590,6 +984,12 @@ namespace Waslah.Presistence.migrations
 
             modelBuilder.Entity("Waslah.Entities.MyRoute", b =>
                 {
+                    b.HasOne("Waslah.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Waslah.Entities.Station", "PriStation")
                         .WithMany("GoingRoute")
                         .HasForeignKey("PrimaryLocId")
@@ -604,9 +1004,17 @@ namespace Waslah.Presistence.migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Waslah.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById");
+
+                    b.Navigation("CreatedBy");
+
                     b.Navigation("PriStation");
 
                     b.Navigation("SecStation");
+
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("Waslah.Entities.Order", b =>
@@ -668,11 +1076,27 @@ namespace Waslah.Presistence.migrations
 
             modelBuilder.Entity("Waslah.Entities.Station", b =>
                 {
+                    b.HasOne("Waslah.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Waslah.Entities.StationType", "StationType")
                         .WithMany("Stations")
-                        .HasForeignKey("Type");
+                        .HasForeignKey("Type")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Waslah.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById");
+
+                    b.Navigation("CreatedBy");
 
                     b.Navigation("StationType");
+
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("Waslah.Entities.UserPoints", b =>
@@ -686,41 +1110,18 @@ namespace Waslah.Presistence.migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Waslah.Entities.AgencyTrip", b =>
+                {
+                    b.Navigation("Links");
+                });
+
             modelBuilder.Entity("Waslah.Entities.ApplicationUser", b =>
                 {
-                    b.OwnsMany("Waslah.Entities.RefreshToken", "RefreshTokens", b1 =>
-                        {
-                            b1.Property<string>("UserId")
-                                .HasColumnType("nvarchar(450)");
+                    b.Navigation("Orders");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                    b.Navigation("Points");
 
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
-
-                            b1.Property<DateTime>("CreatedOn")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<DateTime>("ExpiresOn")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<DateTime?>("RevokedOn")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<string>("Token")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("UserId", "Id");
-
-                            b1.ToTable("RefreshTokens", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
-                        });
-
-                    b.Navigation("RefreshTokens");
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("Waslah.Entities.ChainedRoute", b =>
@@ -751,15 +1152,6 @@ namespace Waslah.Presistence.migrations
             modelBuilder.Entity("Waslah.Entities.StationType", b =>
                 {
                     b.Navigation("Stations");
-                });
-
-            modelBuilder.Entity("Waslah.Entities.ApplicationUser", b =>
-                {
-                    b.Navigation("Orders");
-
-                    b.Navigation("Points");
-
-                    b.Navigation("Reports");
                 });
 #pragma warning restore 612, 618
         }

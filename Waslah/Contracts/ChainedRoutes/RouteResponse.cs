@@ -1,14 +1,10 @@
-﻿namespace Waslah.Contracts.ChainedRoutes
-{
-    public record RouteResponse(
-        int Id,
-       ChainedStationResponse FirstStation,
-       ChainedStationResponse SecondStation,
-       IEnumerable<ListedRouteResponse> Routes, 
-       int NumberOfRides,
-       double? Price,
-       double? Distnace,
-       double? Time
-        );
-    
-}
+﻿namespace Waslah.Contracts.ChainedRoutes;
+
+public record RouteResponse(
+    int Id,
+    string FirstStation,
+    string FirstCity,
+    string LastStation,
+    string LastCity,
+    int NumberOfRides
+    );

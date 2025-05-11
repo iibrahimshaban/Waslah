@@ -9,7 +9,8 @@
         Double Distance,
         double Time,
         double Price,
-        string Classification
+        string Classification,
+        bool IsDisabled
         );
     
 }

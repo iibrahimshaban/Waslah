@@ -8,6 +8,10 @@ namespace Waslah.Presistence.EntitiesConfiguration
             builder.HasKey(R => R.Id);
             builder.ToTable("MyRoutes");
 
+            builder
+                .HasIndex(x => new { x.PrimaryLocId, x.SecondaryLocId })
+                .IsUnique();
+
             builder.
                 HasOne(R => R.PriStation)
                 .WithMany(s => s.GoingRoute)
@@ -19,6 +23,11 @@ namespace Waslah.Presistence.EntitiesConfiguration
                .WithMany(s => s.ReturnedRoute)
                .HasForeignKey(R => R.SecondaryLocId)
                .HasPrincipalKey(s => s.LocationId);
+
+            builder
+            .HasMany(r => r.Reports)
+            .WithOne(rp => rp.Route)
+            .HasForeignKey(rp => rp.RouteId);
 
             builder
             .HasMany(r => r.chainedRoutes)

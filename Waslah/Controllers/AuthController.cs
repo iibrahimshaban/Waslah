@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Waslah.Services;
 
@@ -11,45 +10,61 @@ namespace Waslah.Controllers
     {
         private readonly IAuthService _authService = authService;
 
-        [HttpPost("Login")]
-        public async Task<IActionResult> LoginAsync([FromBody] AuthRequest request, CancellationToken cancellationToken = default)
+        [HttpPost("registration")]
+        public async Task<IActionResult> Registration([FromForm] RegistrationRequest request)
         {
-            var LoginResult = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
+            var result = await _authService.RegistrationAsync(request);
 
-            return LoginResult.IsSuccess
-                ? Ok(LoginResult.Value)
-                : LoginResult.ToProblem();
+            return result.IsSuccess ? NoContent() : result.ToProblem();
         }
-        [HttpPost("Refresh")]
-        public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequest refresh,
-        CancellationToken cancellationToken = default)
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
         {
-            var AuthResult = await _authService.GetRefreshTokenAsync(refresh.Token
-                , refresh.RefreshToken, cancellationToken);
+            var result = await _authService.ConfirmEmailAsync(request);
 
-            return AuthResult.IsSuccess
-                ? Ok(AuthResult.Value)
-                : AuthResult.ToProblem();
+            return result.IsSuccess ? NoContent() : result.ToProblem();
         }
-        [HttpPost("Revoke-Refresh-Token")]
-        public async Task<IActionResult> RevokeRefreshTokenAsync([FromBody] RefreshTokenRequest refresh,
-        CancellationToken cancellationToken = default)
+        [HttpPost("resend-confirmation-email")]
+        public async Task<IActionResult> ResendConfiramtionEmail([FromBody] ResendConfirmEmailRequest request)
         {
-            var IsRevoked = await _authService.RevokeRefreshTokenAsync(refresh.Token,
-                refresh.RefreshToken, cancellationToken);
+            var result = await _authService.ReasendEmailConfiramtionCode(request);
 
-            return IsRevoked.IsSuccess
-                ? NoContent()
-                : IsRevoked.ToProblem();
+            return result.IsSuccess ? NoContent() : result.ToProblem();
         }
-        [HttpPost("SignUp")]
-        public async Task<IActionResult> SignUp([FromBody] RegistrationRequest request, CancellationToken cancellationToken)
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var result = await _authService.RegistrationAsync(request, cancellationToken);
+            var result = await _authService.GetTokenAsync(request);
 
-            return result.IsSuccess
-                ? Ok(result.Value)
-                : result.ToProblem();
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+        [HttpPost("new-refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
+        {
+            var result = await _authService.GetRefreshTokenAsync(request);
+
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+        [HttpPost("revoke-refresh-token")]
+        public async Task<IActionResult> RevokeRefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            var result = await _authService.RevokeRefreshTokenAsync(request);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+        [HttpPost("forget-password")]
+        public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequest request)
+        {
+            var result = await _authService.SendResetPasswordCodeAsync(request);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _authService.ResetPasswordAsync(request);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿
 using Azure.Core;
+using Waslah.Authentication.Filters;
 
 namespace Waslah.Controllers
 {
@@ -9,16 +10,24 @@ namespace Waslah.Controllers
     {
         private readonly IStationServices _stationServices= stationServices;
 
+        [HttpGet("info")]
+        [HasPermission(Permissions.GetStations)]
+        public async Task<IActionResult> Start(CancellationToken cancellationToken)
+        {
+            var stations = await _stationServices.GetAllStationsInfoAsync(cancellationToken);
+
+            return Ok(stations);
+        }
         [HttpGet("All")]
+        [HasPermission(Permissions.GetStations)]
         public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
         {
-            var result = await _stationServices.GetAllAsync(cancellationToken);
+            var stations = await _stationServices.GetAllAsync(cancellationToken);
 
-            return result.IsSuccess 
-                ? Ok(result.Value)
-                : result.ToProblem();
+            return Ok(stations);
         }
         [HttpGet("{locid}")]
+        [HasPermission(Permissions.GetStations)]
         public async Task<IActionResult> GetByLocationId(int locid, CancellationToken cancellationToken)
         {
             
@@ -29,7 +38,8 @@ namespace Waslah.Controllers
                 : result.ToProblem();
         }
         [HttpPost("Nearest")]
-        public async Task<IActionResult> GetByNearestStationsAsync([FromBody] StationRequest request,
+        [Authorize(Roles = DefaultRoles.Member)]
+        public async Task<IActionResult> GetByNearestStationsAsync([FromBody] FindStationRequest request,
             CancellationToken cancellationToken)
         {
             string[] parts = request.Point.Split(',');
@@ -42,7 +52,39 @@ namespace Waslah.Controllers
             if (!stations.Any())
                 return BadRequest("you are far from all the stations in our system");
 
-            return Ok(stations.Adapt<IEnumerable<StationDistanceResponse>>());
+            return Ok(stations);
+        }
+        [HttpPost("")]
+        [HasPermission(Permissions.CreateStations)]
+        public async Task<IActionResult> Create([FromBody] StationRequest request,
+            CancellationToken cancellationToken)
+        {
+
+            var result = await _stationServices.CreateAsync(request ,cancellationToken);
+
+            return result.IsSuccess
+            ? CreatedAtAction(nameof(GetByLocationId),new { locid = result.Value.StationId},result.Value)
+            : result.ToProblem();
+        }
+        [HttpPut("{Id}")]
+        [HasPermission(Permissions.UpdateStations)]
+        public async Task<IActionResult> Update([FromRoute]int Id, [FromBody] StationRequest request,CancellationToken cancellationToken)
+        {
+            var result = await _stationServices.UpdateAsync(Id,request,cancellationToken);
+
+            return result.IsSuccess 
+                ? NoContent() 
+                : result.ToProblem();
+        }
+        [HttpPut("{Id}/toggle-status")]
+        [HasPermission(Permissions.UpdateStations)]
+        public async Task<IActionResult> ToggleStatus([FromRoute]int Id,CancellationToken cancellationToken)
+        {
+            var result = await _stationServices.ToggleStatusAsync(Id,cancellationToken);
+
+            return result.IsSuccess 
+                ? NoContent() 
+                : result.ToProblem();
         }
     }
 }

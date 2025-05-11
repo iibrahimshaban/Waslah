@@ -2,10 +2,10 @@
 
 public record RegistrationRequest(
     string Email,
-    string PhoneNumber,
     string Password,
     string FirstName,
     string LastName,
-    string UserName
+    string UserName,
+    IFormFile? ProfilePhoto
     );
 

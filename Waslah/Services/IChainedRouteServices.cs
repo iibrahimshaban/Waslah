@@ -3,8 +3,8 @@
     public interface IChainedRouteServices
     {
         Task<IEnumerable<RouteResponse>> GetAllAsync(CancellationToken cancellationToken);
-        Task<Result<IEnumerable<ChainedRoute>>> GetByLocationIdAsync(IEnumerable<GeneratedRouteResponse> LocationIds,CancellationToken cancellationToken);
-        Task<Result<IEnumerable<RouteResponse>>> FindByLocationPointsAsync(RouteRequest request
+        Task<Result<IEnumerable<RouteDetailsResponse>>> FindByLocationPointsAsync(FindRouteRequest request
            , string UserId, CancellationToken cancellationToken);
+        Task<Result<IEnumerable<ListedRouteResponse>>> GetAllCurrentAsync(int CRId, CancellationToken cancellationToken = default);
     }
 }

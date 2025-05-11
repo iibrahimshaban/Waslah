@@ -1,67 +1,74 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace Waslah.Authentication
 {
     public class JwtProvider(IOptions<JwtOptions> JwtOptions) : IJwtProvider
     {
-        private readonly JwtOptions _options = JwtOptions.Value;
+        private readonly JwtOptions _jwtOptions = JwtOptions.Value;
 
-        public (string Token, int ExpiresIn) GenerateToken(ApplicationUser user)
+        public (string Token, int ExpiresIn) GenerateToken(ApplicationUser user , IEnumerable<string> Roles,
+            IEnumerable<string> Permissions )
         {
             Claim[] claims = [
-            new(JwtRegisteredClaimNames.Sub,user.Id),
-            new(JwtRegisteredClaimNames.Email,user.Email!),
+                new(JwtRegisteredClaimNames.Sub,user.Id),
             new(JwtRegisteredClaimNames.GivenName,user.FirstName),
             new(JwtRegisteredClaimNames.FamilyName,user.LastName),
+            new(JwtRegisteredClaimNames.Email,user.Email!),
             new(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-        ];
+            new Claim(nameof(Roles), JsonSerializer.Serialize(Roles), JsonClaimValueTypes.JsonArray),
+            new Claim(nameof(Permissions), JsonSerializer.Serialize(Permissions), JsonClaimValueTypes.JsonArray)
+                ];
 
             var SymmetricSequrityKey = new
-                SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
+                SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 
             var SigningCredintials = new SigningCredentials(SymmetricSequrityKey, SecurityAlgorithms.HmacSha256);
 
-
-            var ExpirationDate = DateTime.UtcNow.AddMinutes(_options.ExpiryMinutes);
+            var ExpiryTime = _jwtOptions.ExpiresIn;
 
             var Token = new JwtSecurityToken(
-                issuer: _options.Issuer,
-                audience: _options.Audience,
+                issuer: _jwtOptions.Issuer,
+                audience: _jwtOptions.Audience,
                 claims: claims,
-                expires: ExpirationDate,
+                expires: DateTime.UtcNow.AddMinutes(ExpiryTime),
                 signingCredentials: SigningCredintials
                 );
 
-            return (Token: new JwtSecurityTokenHandler().WriteToken(Token), ExpiresIn: _options.ExpiryMinutes * 60);
+            return (Token: new JwtSecurityTokenHandler().WriteToken(Token), ExpiresIn: ExpiryTime * 60);
 
         }
-        public string? ValidateToken(string token)
+
+        public Result<string> ValidateToken(string Token)
         {
             var TokenHandler = new JwtSecurityTokenHandler();
-            var SymmetricSequrityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
+            var SynmmetricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 
             try
             {
-                TokenHandler.ValidateToken(token, new TokenValidationParameters
+                TokenHandler.ValidateToken(Token, new TokenValidationParameters
                 {
-                    IssuerSigningKey = SymmetricSequrityKey,
+                    IssuerSigningKey = SynmmetricKey,
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = false,
                     ValidateAudience = false,
+                    ValidateLifetime = false,
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
 
-                var JwtToken = (JwtSecurityToken)validatedToken;
+                var jwtToken = (JwtSecurityToken)validatedToken;
 
-                return JwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
+                var userId = jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
+
+                return Result.Success(userId);
+
             }
             catch
             {
-                return null;
+                return Result.Failure<string>(UserErrors.InvalidJwtToken);
             }
         }
     }

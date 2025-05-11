@@ -13,11 +13,14 @@ namespace Waslah.Presistence.EntitiesConfiguration
                 .HasForeignKey(s => s.Type)
                 .HasPrincipalKey(st => st.Name);
 
-            //builder.Property(s => s.LocationId)
-            //    .HasComputedColumnSql("([GovNo]*10000+[CityNo]*100+[StationNo])",stored: true);
-
-           // builder.Property(s => s.ModelId)
-           //.HasComputedColumnSql("CONCAT([GovNo],:, [CityNo],:, [StationNo])", stored: true);
+            builder.Property(s => s.Government)
+                .HasMaxLength(100);
+            
+            builder.Property(s => s.City)
+                .HasMaxLength(100);
+            
+            builder.Property(s => s.Government)
+                .HasMaxLength(450);
 
             
         }

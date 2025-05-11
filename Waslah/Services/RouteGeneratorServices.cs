@@ -1,51 +1,132 @@
-﻿using System.Collections.Generic;
-using System.Security.Cryptography.Xml;
-
+﻿using Microsoft.Data.SqlClient;
 namespace Waslah.Services
 {
     public class RouteGeneratorServices(ApplicationDbContext context) : IRouteGeneratorServices
     {
         private readonly ApplicationDbContext _context = context;
 
-        public async Task<Result<IEnumerable<GeneratedRouteResponse>>> GetAllAsync(int CRId, CancellationToken cancellationToken = default)
+        public async Task<Result<ListedRouteResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var ChainedRouteExistis = await _context.ChainedRoutes.AnyAsync(x => x.Id == CRId,cancellationToken);
-
-            if (!ChainedRouteExistis)
-                return Result.Failure<IEnumerable<GeneratedRouteResponse>>(RouteErrors.NotFound);
-
-            var routes = await _context.MyRoutes
-                .Where(x => x.chainedRoutes.Any(cr => cr.Id == CRId))
-                .Include(r => r.PriStation)
-                .Include(r => r.SecStation)
-                .ProjectToType<GeneratedRouteResponse>()
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
-
-            if (routes.Count > 0)
-                return Result.Success<IEnumerable<GeneratedRouteResponse>>(routes);
-
-            return Result.Failure<IEnumerable<GeneratedRouteResponse>>(RouteErrors.NotGenerated);
-
-           
-        }
-
-        public async Task<Result<GeneratedRouteResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
-        {
-            var route = await _context.MyRoutes
-                .FindAsync(id, cancellationToken);
+            var route = await _context.MyRoutes.
+                AsNoTracking()
+                .Where(x => x.Id == id)
+                .ProjectToType<ListedRouteResponse>()
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (route is null)
-                return Result.Failure<GeneratedRouteResponse>(RouteErrors.NotFound);
+                return Result.Failure<ListedRouteResponse>(RouteErrors.NotFound);
 
-            return Result.Success(route.Adapt<GeneratedRouteResponse>());
+            return Result.Success(route);
         }
-        public async Task<Result<IEnumerable<GeneratedRouteResponse>>> GetRouteAsync(RouteGeneratorRequest Request,
-            CancellationToken cancellationToken)
+
+        public async Task<Result<ListedRouteResponse>> CreateAsync(RouteRequest request,CancellationToken cancellationToken = default)
+        {
+            var stationIds = new[] { request.PrimaryId, request.SecondaryId };
+
+            var existingStationCount = await _context.Stations
+                .CountAsync(x => stationIds.Contains(x.LocationId), cancellationToken);
+
+            if (existingStationCount < 2)
+                return Result.Failure<ListedRouteResponse>(StationErrors.NotFound);
+
+            var Classification = string.Empty;
+
+            if (request.IsExternal)
+                Classification = RouteConstants.External;
+            else 
+                Classification = RouteConstants.Internal;
+
+            var NewRoute = new MyRoute
+            {
+                PrimaryLocId = request.PrimaryId,
+                SecondaryLocId = request.SecondaryId,
+                Time = request.Time,
+                Price = request.Price,
+                Distance = request.Distance,
+                Classification = Classification,
+                IsDisabled = true
+            };
+
+            try
+            {
+                await _context.AddAsync(NewRoute, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 2601)
+            {
+                // 2601 = Cannot insert duplicate key row in object
+                return Result.Failure<ListedRouteResponse>(RouteErrors.Doublicated);
+            }
+
+            var routeWithStations = await _context.MyRoutes
+                .Include(x => x.PriStation)
+                .Include(x => x.SecStation)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == NewRoute.Id, cancellationToken);
+
+            // Map to DTO
+            var routeDto = routeWithStations.Adapt<ListedRouteResponse>();
+
+            return Result.Success(routeDto);
+
+        }
+        public async Task<Result> UpdateAsync(int Id, RouteRequest request, CancellationToken cancellationToken = default)
+        {
+            if (await _context.MyRoutes.FindAsync(Id, cancellationToken) is not { } Route)
+                return Result.Failure(RouteErrors.NotFound);
+
+            var stationIds = new[] { request.PrimaryId, request.SecondaryId };
+
+            var existingStationCount = await _context.Stations
+                .CountAsync(x => stationIds.Contains(x.LocationId), cancellationToken);
+
+            if (existingStationCount < 2)
+                return Result.Failure<ListedRouteResponse>(StationErrors.NotFound);
+
+            var Classification = string.Empty;
+
+            if (request.IsExternal)
+                Classification = RouteConstants.External;
+            else
+                Classification = RouteConstants.Internal;
+
+            Route.PrimaryLocId = request.PrimaryId;
+            Route.SecondaryLocId = request.SecondaryId;
+            Route.Time = request.Time;
+            Route.Price = request.Price;
+            Route.Distance = request.Distance;
+            Route.Classification = Classification;
+
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 2601)
+            {
+                // 2601 = Cannot insert duplicate key row in object
+                return Result.Failure<ListedRouteResponse>(RouteErrors.Doublicated);
+            }
+
+            return Result.Success();
+
+        }
+        public async Task<Result> ToggleStatusAsync(int Id,CancellationToken cancellationToken= default)
+        {
+            if (await _context.MyRoutes.FindAsync(Id, cancellationToken) is not { } Route)
+                return Result.Failure(RouteErrors.NotFound);
+
+            Route.IsDisabled = !Route.IsDisabled;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
+
+        public async Task<Result<IEnumerable<GeneratedRouteResponse>>> GetRouteAsync(IEnumerable<StationDistances> NearestToStart,
+           IEnumerable<StationDistances> NearestToEnd, CancellationToken cancellationToken)
         {
             var response = new List<GeneratedRouteResponse>();
 
-            var routes = await StationToStationRoute(Request.NearestToStart, Request.NearestToEnd, cancellationToken);
+            var routes = await StationToStationRoute(NearestToStart, NearestToEnd, cancellationToken);
 
             if (routes.IsSuccess)
             {
@@ -58,7 +139,7 @@ namespace Waslah.Services
 
             }
 
-            var result = await StationToCity(Request.NearestToStart, Request.NearestToEnd, cancellationToken);
+            var result = await StationToCity(NearestToStart,NearestToEnd, cancellationToken);
 
             
             if (result.IsSuccess)
@@ -93,7 +174,7 @@ namespace Waslah.Services
                 return Result.Failure<IEnumerable<MyRoute>>(RouteErrors.Doublicated);
 
             var YourRoutes = await _context.MyRoutes
-                .Where(r => StartIds.Contains(r.PrimaryLocId) && EndIds.Contains(r.SecondaryLocId))
+                .Where(r => (StartIds.Contains(r.PrimaryLocId) && EndIds.Contains(r.SecondaryLocId)) && !r.IsDisabled )
                 .ToListAsync(cancellationToken);
 
             foreach ( var route in YourRoutes)

@@ -1,7 +1,7 @@
 ﻿namespace Waslah.Contracts.Stations
 {
     public record StationDistanceResponse(
-        int LocationId,
+     int LocationId,
      string? Name,
      string? City,
      string coordinates,

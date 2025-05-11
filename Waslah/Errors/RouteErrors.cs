@@ -9,6 +9,6 @@
         public static readonly Error Doublicated = new(
             "Route.Doublicated", "can't save this route as it's already saved", StatusCodes.Status409Conflict);
         public static readonly Error NotGenerated = new(
-            "Route.NotGeneratedYet", "it didn't generate a chained route yet", StatusCodes.Status409Conflict);
+            "Route.NotGeneratedYet", "can't generate route ", StatusCodes.Status409Conflict);
     }
 }

@@ -5,7 +5,7 @@ namespace Waslah.Extensions
 {
     public static class RouteExtensions
     {
-        public static RoutePointsRequest EvaluatePoints(this RouteRequest RouteRequest)
+        public static RoutePointsRequest EvaluatePoints(this FindRouteRequest RouteRequest)
         {
             string[] Sparts = RouteRequest.Start.Split(',');
             string[] Eparts = RouteRequest.End.Split(',');

@@ -1,7 +1,6 @@
 ﻿namespace Waslah.Contracts.GeneratedRoutes
 {
-
-    public record GeneratedRouteResponse(
+  public record GeneratedRouteResponse(
         int StartId,
         int EndId
         );

@@ -8,6 +8,8 @@ namespace Waslah.Presistence.EntitiesConfiguration
             builder.Property(x => x.Sevirity).HasMaxLength(50);
             builder.Property(x => x.Type).HasMaxLength(50);
             builder.Property(x => x.UserFeedBack).HasMaxLength(1000);
+
+            builder.HasKey(r => r.Id);
         }
     }
 }

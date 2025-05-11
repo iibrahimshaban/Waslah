@@ -1,10 +1,13 @@
 ﻿
 using FluentValidation.AspNetCore;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Waslah.Authentication;
+using Waslah.Authentication.Filters;
+using Waslah.Settings;
 
 namespace Waslah
 {
@@ -15,11 +18,12 @@ namespace Waslah
         {
             services.AddControllers();
             services
-                .AddIdentityConfiguration(configuration)
                 .AddOpenApi()
                 .AddDbContextConfig(configuration)
                 .AddServicesRegisteration()
-                .AddMappingConfig();
+                .AddMappingConfig()
+                .AddIdentityConfiguration(configuration)
+                .AddBackGroundJobsConfig(configuration);
 
             return services;
         }
@@ -32,6 +36,17 @@ namespace Waslah
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(ConnectionSting));
 
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.SignIn.RequireConfirmedEmail = true;
+                options.User.RequireUniqueEmail = true;
+            });
+
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
+                 .AddEntityFrameworkStores<ApplicationDbContext>()
+                 .AddDefaultTokenProviders();
+
             return services;
         }
         private static IServiceCollection AddServicesRegisteration(this IServiceCollection services)
@@ -40,7 +55,14 @@ namespace Waslah
             services.AddScoped<IRouteGeneratorServices,RouteGeneratorServices>();
             services.AddScoped<IChainedRouteServices,ChainedRouteServices>();
             services.AddScoped<IOrderService, OrderService>();
-            
+            services.AddScoped<ICustomEmailService,EmailService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAgencyTripService, AgencyTripService>();
+
+            services.AddHybridCache();
+            services.AddHttpContextAccessor();
+
             return services;
         }
         private static IServiceCollection AddMappingConfig(this IServiceCollection services)
@@ -53,22 +75,29 @@ namespace Waslah
             services.AddFluentValidationAutoValidation()
              .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
+
             return services;
         }
         private static IServiceCollection AddIdentityConfiguration(this IServiceCollection services
     ,       IConfiguration configuration)
         {
+
+            services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+
             services.AddScoped<IAuthService, AuthService>();
 
+            services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+
             services.AddOptions<JwtOptions>()
-                .BindConfiguration(JwtOptions.SectionName)
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
+                    .BindConfiguration(JwtOptions.SectionName)
+                    .ValidateDataAnnotations()
+                    .ValidateOnStart();
 
             var settings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
-
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddSingleton<IJwtProvider, JwtProvider>();
 
@@ -93,14 +122,22 @@ namespace Waslah
                  };
              });
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequiredLength = 8;
-                options.User.RequireUniqueEmail = true;
-            });
-
             return services;
 
+        }
+        private static IServiceCollection AddBackGroundJobsConfig(this IServiceCollection services, IConfiguration configuration)
+        {
+            // Add Hangfire services.
+            services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+            // Add the processing server as IHostedService
+            services.AddHangfireServer();
+
+            return services;
         }
     }
     
